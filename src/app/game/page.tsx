@@ -1,170 +1,158 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useGameState } from '@/hooks/useGameState';
-import { Button } from '@/components/ui/button';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 
 export default function GamePage() {
   const router = useRouter();
-  const [isMounted, setIsMounted] = useState(false);
-  const [showWelcome, setShowWelcome] = useState(false);
-  const [decisionPrice, setDecisionPrice] = useState<number | undefined>(undefined);
-  const [decisionIndex, setDecisionIndex] = useState<number | undefined>(undefined);
-  const [isReplayComplete, setIsReplayComplete] = useState(false);
-  const [showResult, setShowResult] = useState(false);
-  const [isCorrect, setIsCorrect] = useState(false);
-
-  const {
-    currentChart,
-    timeFrame,
-    handleTimeFrameChange,
-    handleChoice,
-    nextRound,
-    score,
-  } = useGameState();
+  const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
+  const [score, setScore] = useState(1000);
+  const [timeLeft, setTimeLeft] = useState(10);
+  const [candleData, setCandleData] = useState({
+    open: 100,
+    high: 120,
+    low: 80,
+    close: 110,
+  });
 
   useEffect(() => {
-    setIsMounted(true);
-    setShowWelcome(true);
+    // Start countdown timer
+    const timer = setInterval(() => {
+      setTimeLeft((prev) => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          // Handle timeout - consider it a wrong answer
+          setIsCorrect(false);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
   }, []);
 
-  const handleDecision = (choice: 'buy' | 'sell') => {
-    if (showResult) return;
-
-    if (!currentChart) return;
-
-    // Store the current price and index
-    const currentIndex = currentChart.length - 10; // Show last 10 candles
-    const currentPrice = currentChart[currentIndex].close;
-    
-    setDecisionPrice(currentPrice);
-    setDecisionIndex(currentIndex);
-    setShowResult(true);
-    setIsCorrect(choice === (currentPrice > currentChart[currentIndex + 10].close ? 'buy' : 'sell'));
+  const handleChoice = (choice: 'buy' | 'sell') => {
+    // Simulate checking if the choice was correct
+    const wasCorrect = Math.random() > 0.5;
+    setIsCorrect(wasCorrect);
+    setScore((prev) => prev + (wasCorrect ? 100 : -100));
   };
 
-  // Wrap the original nextRound to reset our additional state
   const handleNextRound = () => {
-    setDecisionPrice(undefined);
-    setDecisionIndex(undefined);
-    setIsReplayComplete(false);
-    nextRound();
+    setIsCorrect(null);
+    setTimeLeft(10);
+    // Generate new candle data
+    setCandleData({
+      open: Math.floor(Math.random() * 100) + 50,
+      high: Math.floor(Math.random() * 100) + 100,
+      low: Math.floor(Math.random() * 50),
+      close: Math.floor(Math.random() * 100) + 50,
+    });
   };
-
-  if (!isMounted) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
-  }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-white flex flex-col">
       {/* Header */}
-      <div className="fixed top-0 left-0 right-0 bg-white shadow-sm z-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center">
-              <h1 className="text-xl font-bold text-gray-900 font-heading">Tradr</h1>
-              <div className="ml-4 flex items-center space-x-2">
-                <Button
-                  variant={timeFrame === '4H' ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => handleTimeFrameChange('4H')}
-                >
-                  4H
-                </Button>
-                <Button
-                  variant={timeFrame === '1D' ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => handleTimeFrameChange('1D')}
-                >
-                  1D
-                </Button>
-                <Button
-                  variant={timeFrame === '1W' ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => handleTimeFrameChange('1W')}
-                >
-                  1W
-                </Button>
-              </div>
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="bg-white border-b-2 border-gray-100 p-4"
+      >
+        <div className="max-w-4xl mx-auto flex justify-between items-center">
+          <button
+            onClick={() => router.push('/')}
+            className="text-gray-600 hover:text-gray-800 font-heading text-sm"
+          >
+            ← BACK
+          </button>
+          <div className="flex items-center gap-8">
+            <div className="text-center">
+              <p className="text-xs text-gray-500 font-sans">SCORE</p>
+              <p className="font-heading text-green-600">${score}</p>
             </div>
-            <div className="flex items-center space-x-4">
-              <div className="text-sm font-medium text-gray-900">
-                Score: {score}
-              </div>
+            <div className="text-center">
+              <p className="text-xs text-gray-500 font-sans">TIME</p>
+              <p className="font-heading text-blue-600">{timeLeft}s</p>
             </div>
           </div>
         </div>
-      </div>
+      </motion.div>
 
-      {/* Main Content */}
-      <div className="pt-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          {/* Chart Placeholder */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 h-[600px] flex items-center justify-center">
-            <div className="text-gray-500 text-lg">Chart temporarily disabled</div>
-          </div>
+      {/* Main Game Area */}
+      <div className="flex-1 flex flex-col items-center justify-center p-4">
+        <div className="max-w-lg w-full space-y-8">
+          {/* Candle Display */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-gray-50 rounded-lg p-8 border-2 border-gray-200"
+          >
+            <div className="flex justify-between items-center mb-4">
+              <span className="font-heading text-sm">BTCUSDT</span>
+              <span className="font-heading text-sm text-gray-500">1M</span>
+            </div>
+            <div className="h-48 flex items-center justify-center">
+              {/* Placeholder for candle chart */}
+              <div className="w-8 relative">
+                <div className="absolute top-0 left-1/2 w-0.5 h-full bg-gray-300 -translate-x-1/2" />
+                <div
+                  className={`absolute w-full ${
+                    candleData.close > candleData.open
+                      ? 'bg-green-500'
+                      : 'bg-red-500'
+                  }`}
+                  style={{
+                    top: `${((candleData.high - candleData.close) / (candleData.high - candleData.low)) * 100}%`,
+                    height: `${Math.abs(candleData.close - candleData.open) / (candleData.high - candleData.low) * 100}%`,
+                  }}
+                />
+              </div>
+            </div>
+          </motion.div>
 
-          {/* Decision Buttons */}
-          <div className="mt-8 flex justify-center space-x-4">
-            <Button
-              size="lg"
-              variant="outline"
-              className="bg-red-50 hover:bg-red-100 text-red-700 border-red-200"
-              onClick={() => handleDecision('sell')}
-              disabled={showResult}
+          {/* Game Controls */}
+          {isCorrect === null ? (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="space-y-4"
             >
-              SELL
-            </Button>
-            <Button
-              size="lg"
-              variant="outline"
-              className="bg-green-50 hover:bg-green-100 text-green-700 border-green-200"
-              onClick={() => handleDecision('buy')}
-              disabled={showResult}
-            >
-              BUY
-            </Button>
-          </div>
-
-          {/* Result Overlay */}
-          <AnimatePresence>
-            {showResult && (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.8 }}
-                className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+              <button
+                onClick={() => handleChoice('buy')}
+                className="w-full bg-[#E7FFF2] hover:bg-[#D0FFE4] text-[#006837] py-4 rounded-lg border-2 border-[#B3FFD6] transition-colors font-heading"
               >
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 20 }}
-                  className="bg-white rounded-lg p-8 max-w-md w-full mx-4 text-center"
-                >
-                  <div className="text-6xl mb-4">
-                    {isCorrect ? '🎯' : '😢'}
-                  </div>
-                  <h2 className="text-2xl font-bold mb-4 font-heading">
-                    {isCorrect ? 'Correct!' : 'Incorrect'}
-                  </h2>
-                  <p className="text-gray-600 mb-6">
-                    {isCorrect
-                      ? 'Great job! You made the right call.'
-                      : 'Better luck next time!'}
-                  </p>
-                  <Button onClick={handleNextRound}>
-                    Next Round
-                  </Button>
-                </motion.div>
-              </motion.div>
-            )}
-          </AnimatePresence>
+                BUY
+              </button>
+              <button
+                onClick={() => handleChoice('sell')}
+                className="w-full bg-[#FFF0F0] hover:bg-[#FFE6E6] text-[#660000] py-4 rounded-lg border-2 border-[#FFD6D6] transition-colors font-heading"
+              >
+                SELL
+              </button>
+            </motion.div>
+          ) : (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="text-center space-y-4"
+            >
+              <h2 className="text-2xl font-heading mb-4">
+                {isCorrect ? (
+                  <span className="text-green-600">CORRECT! +$100</span>
+                ) : (
+                  <span className="text-red-600">WRONG! -$100</span>
+                )}
+              </h2>
+              <button
+                onClick={handleNextRound}
+                className="w-full bg-[#F0F0FF] hover:bg-[#E6E6FF] text-[#000066] py-4 rounded-lg border-2 border-[#D6D6FF] transition-colors font-heading"
+              >
+                NEXT ROUND
+              </button>
+            </motion.div>
+          )}
         </div>
       </div>
     </div>
