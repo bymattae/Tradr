@@ -1,15 +1,57 @@
-# Ansh & Riley Full-Stack Template
+# Buy or Sell - Trading Game
 
-This is a full-stack template project for Software Composers to create  applications with AI.
+A fun and engaging mobile-first trading game where players predict market movements based on historical chart data.
 
-## Getting started
-To create a new project, you go to `/paths`, choose from our list of Paths, and then use Cursor's Composer feature to quickly scaffold your project!
+## Features
 
-You can also edit the Path's prompt template to be whatever you like!
+- Real historical market data visualization
+- Simple Buy/Sell prediction gameplay
+- XP and leveling system
+- Streak bonuses
+- Meme reactions and social sharing
+- Mobile-first design
+- Beautiful UI with animations
 
-## Technologies used
-This doesn't really matter, but is useful for the AI to understand more about this project. We are using the following technologies
-- React with Next.js 14 App Router
-- TailwindCSS
-- Firebase Auth, Storage, and Database
-- Multiple AI endpoints including OpenAI, Anthropic, and Replicate using Vercel's AI SDK
+## Tech Stack
+
+- Next.js 14 (App Router)
+- React 18
+- TypeScript
+- Tailwind CSS
+- Lightweight Charts
+- Firebase (for future auth and leaderboard)
+
+## Getting Started
+
+1. Clone the repository
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+3. Run the development server:
+   ```bash
+   npm run dev
+   ```
+4. Open [http://localhost:3000](http://localhost:3000) in your browser
+
+## Project Structure
+
+```
+src/
+├── app/                    # Next.js app router pages
+├── components/            # React components
+├── hooks/                 # Custom React hooks
+└── lib/                   # Utility functions and configurations
+```
+
+## Contributing
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.

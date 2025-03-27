@@ -1,59 +1,73 @@
 "use client";
 
-import React, { createContext, useEffect, useState } from "react";
-import { signInWithPopup, GoogleAuthProvider, signOut as firebaseSignOut } from "firebase/auth";
-import { User } from "firebase/auth";
-import { auth } from "../firebase/firebase";
+import { createContext, useContext, useState } from 'react';
+
+type User = {
+  email: string | null;
+  photoURL?: string | null;
+  user_metadata?: {
+    avatar_url?: string;
+  };
+};
 
 interface AuthContextType {
   user: User | null;
   loading: boolean;
+  signInWithEmail: (email: string) => Promise<void>;
   signInWithGoogle: () => Promise<void>;
+  signInWithApple: () => Promise<void>;
   signOut: () => Promise<void>;
 }
 
-const AuthContext = createContext<AuthContextType>({
+export const AuthContext = createContext<AuthContextType>({
   user: null,
-  loading: true,
+  loading: false,
+  signInWithEmail: async () => {},
   signInWithGoogle: async () => {},
-  signOut: async () => {},
+  signInWithApple: async () => {},
+  signOut: async () => {}
 });
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged((user) => {
-      setUser(user);
-      setLoading(false);
-    });
-
-    return () => unsubscribe();
-  }, []);
-
-  const signInWithGoogle = async () => {
-    const provider = new GoogleAuthProvider();
-    try {
-      await signInWithPopup(auth, provider);
-    } catch (error) {
-      console.error("Error signing in with Google", error);
-    }
+  const signInWithEmail = async (email: string) => {
+    console.log('Sign in with email:', email);
+    setUser({ email });
   };
 
-  const signOutUser = async () => {
-    try {
-      await firebaseSignOut(auth);
-    } catch (error) {
-      console.error("Error signing out", error);
-    }
+  const signInWithGoogle = async () => {
+    console.log('Sign in with Google');
+    setUser({ email: 'demo@example.com' });
+  };
+
+  const signInWithApple = async () => {
+    console.log('Sign in with Apple');
+    setUser({ email: 'demo@example.com' });
+  };
+
+  const signOut = async () => {
+    setUser(null);
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, signInWithGoogle, signOut: signOutUser }}>
+    <AuthContext.Provider value={{
+      user,
+      loading: false,
+      signInWithEmail,
+      signInWithGoogle,
+      signInWithApple,
+      signOut,
+    }}>
       {children}
     </AuthContext.Provider>
   );
 }
 
-export { AuthContext };
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
+};

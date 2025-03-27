@@ -2,28 +2,158 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --foreground-rgb: 0, 0, 0;
-  --background-start-rgb: 214, 219, 220;
-  --background-end-rgb: 255, 255, 255;
-}
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --foreground-rgb: 255, 255, 255;
-    --background-start-rgb: 0, 0, 0;
-    --background-end-rgb: 0, 0, 0;
-  }
+:root {
+  --primary: #40E0A0;
+  --secondary: #4080FF;
+  --background: #f4f6ff;
+  --text: #1F2937;
 }
 
 body {
-  color: rgb(var(--foreground-rgb));
-  background: linear-gradient(
-      to bottom,
-      transparent,
-      rgb(var(--background-end-rgb))
-    )
-    rgb(var(--background-start-rgb));
+  color: var(--text);
+  background: var(--background);
+  font-family: 'Press Start 2P', cursive;
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: none;
+}
+
+@layer base {
+  * {
+    @apply antialiased;
+  }
+
+  input, textarea {
+    font-family: 'Press Start 2P', cursive;
+    font-size: 10px;
+  }
+
+  button {
+    font-family: 'Press Start 2P', cursive;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-bold;
+  }
+}
+
+@layer components {
+  .btn {
+    @apply w-full p-4 rounded-xl transition-all duration-300;
+  }
+
+  .btn-primary {
+    @apply bg-black text-white hover:bg-gray-800 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed;
+  }
+
+  .input {
+    @apply w-full p-4 bg-gray-50 border-2 rounded-lg text-black text-[10px] 
+    focus:outline-none transition-all duration-300 border-gray-200 
+    focus:border-[--primary] focus:shadow-[0_0_15px_rgba(0,255,153,0.2)];
+  }
+
+  .card {
+    @apply w-full p-6 rounded-xl shadow-sm;
+  }
+
+  .progress-steps {
+    @apply flex justify-center space-x-2 mb-8;
+  }
+
+  .progress-step {
+    @apply h-1 rounded-full transition-all duration-300;
+  }
+
+  .progress-step.active {
+    @apply w-8 bg-[--primary];
+  }
+
+  .progress-step:not(.active) {
+    @apply w-4 bg-gray-200;
+  }
+}
+
+/* Custom Animations */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Animations */
+@keyframes letterFlicker {
+  0%, 100% { opacity: 1; }
+  10% { opacity: 0.8; }
+  20% { opacity: 0.9; }
+  30% { opacity: 0.8; }
+  40% { opacity: 1; }
+}
+
+.letter-flicker {
+  animation: letterFlicker 2s infinite;
+}
+
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.slide-up {
+  animation: slideUp 0.5s ease-out;
+}
+
+@keyframes coinPulse {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
+}
+
+.coin-pulse {
+  animation: coinPulse 2s ease-in-out infinite;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-2px); }
+  75% { transform: translateX(2px); }
+}
+
+.shake {
+  animation: shake 0.2s ease-in-out;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.spin {
+  animation: spin 0.6s linear infinite;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
 }
 
 @layer utilities {
