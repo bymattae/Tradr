@@ -46,7 +46,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
               <div className="flex-1">
                 <div className="flex items-center gap-3 mb-1">
                   <span className="w-6 h-6 flex items-center justify-center">📊</span>
-                  <span>I'm new here</span>
+                  <span>I&apos;m new here</span>
                 </div>
                 <div className="text-[10px] text-gray-500 ml-9">
                   Make an account now
@@ -71,6 +71,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
               </div>
             </Link>
           </div>
+          <p className="text-sm text-gray-500">Don&apos;t have an account? Sign up</p>
         </div>
       </div>
     </div>

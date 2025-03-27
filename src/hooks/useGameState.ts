@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useMemo } from 'react';
 
 type TimeFrame = '4H' | '1D' | '1W';
 
@@ -108,14 +108,17 @@ export function useGameState() {
   }, []);
 
   // Get current chart data based on timeframe
-  const currentChart = isClient ? aggregateCandles(baseCandles, timeFrame) : [];
+  const currentChart = useMemo(() => {
+    if (!baseCandles || baseCandles.length === 0) return null;
+    return aggregateCandles(baseCandles, timeFrame);
+  }, [baseCandles, timeFrame]);
 
   const handleTimeFrameChange = useCallback((newTimeFrame: TimeFrame) => {
     setTimeFrame(newTimeFrame);
   }, []);
 
   const handleChoice = useCallback((choice: 'buy' | 'sell') => {
-    if (!currentChart.length) return;
+    if (!currentChart || currentChart.length === 0) return;
     
     const lastCandle = currentChart[currentChart.length - 1];
     const isUp = lastCandle.close > lastCandle.open;

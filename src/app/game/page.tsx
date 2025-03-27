@@ -1,52 +1,39 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Chart } from '@/components/Chart';
-import { GameControls } from '@/components/GameControls';
-import { ResultScreen } from '@/components/ResultScreen';
 import { useGameState } from '@/hooks/useGameState';
-import WelcomeSlides from '@/app/components/WelcomeSlides';
+import { Button } from '@/components/ui/button';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useRouter } from 'next/navigation';
 
 export default function GamePage() {
+  const router = useRouter();
   const [isMounted, setIsMounted] = useState(false);
   const [showWelcome, setShowWelcome] = useState(false);
-  const [decisionPrice, setDecisionPrice] = useState<number | null>(null);
-  const [decisionIndex, setDecisionIndex] = useState<number | null>(null);
+  const [decisionPrice, setDecisionPrice] = useState<number | undefined>(undefined);
+  const [decisionIndex, setDecisionIndex] = useState<number | undefined>(undefined);
   const [isReplayComplete, setIsReplayComplete] = useState(false);
+  const [showResult, setShowResult] = useState(false);
+  const [isCorrect, setIsCorrect] = useState(false);
 
   const {
     currentChart,
-    showResult,
-    isCorrect,
     timeFrame,
     handleTimeFrameChange,
+    handleChoice,
     nextRound,
     score,
-    streak,
-    level,
-    handleChoice: originalHandleChoice
   } = useGameState();
 
   useEffect(() => {
     setIsMounted(true);
-    // Check if we should show welcome slides
-    const shouldShowWelcome = localStorage.getItem('showWelcome') === 'true';
-    if (shouldShowWelcome) {
-      setShowWelcome(true);
-      localStorage.removeItem('showWelcome'); // Clear the flag
-    }
+    setShowWelcome(true);
   }, []);
 
-  const handleWelcomeComplete = () => {
-    const audio = new Audio('/success.mp3');
-    audio.play().catch(() => {});
-    setShowWelcome(false);
-  };
-
-  // Wrap the original handleChoice to add replay functionality
-  const handleChoice = (choice: 'buy' | 'sell') => {
+  const handleDecision = (choice: 'buy' | 'sell') => {
     if (showResult) return;
+
+    if (!currentChart) return;
 
     // Store the current price and index
     const currentIndex = currentChart.length - 10; // Show last 10 candles
@@ -54,153 +41,132 @@ export default function GamePage() {
     
     setDecisionPrice(currentPrice);
     setDecisionIndex(currentIndex);
-    setIsReplayComplete(false);
-
-    // Start the replay
-    setTimeout(() => {
-      originalHandleChoice(choice);
-      setIsReplayComplete(true);
-    }, (currentChart.length - currentIndex) * 300); // 300ms per candle
+    setShowResult(true);
+    setIsCorrect(choice === (currentPrice > currentChart[currentIndex + 10].close ? 'buy' : 'sell'));
   };
 
   // Wrap the original nextRound to reset our additional state
   const handleNextRound = () => {
-    setDecisionPrice(null);
-    setDecisionIndex(null);
+    setDecisionPrice(undefined);
+    setDecisionIndex(undefined);
     setIsReplayComplete(false);
     nextRound();
   };
 
   if (!isMounted) {
     return (
-      <main className="min-h-screen flex flex-col bg-[#F8FAFC]">
-        <div className="w-full space-y-4">
-          <div className="px-4">
-            <div className="h-8 bg-blue-50 rounded-xl animate-pulse" />
-          </div>
-          <div className="h-[50vh] bg-blue-50 rounded-xl animate-pulse" />
-          <div className="px-4">
-            <div className="h-12 bg-blue-50 rounded-xl animate-pulse" />
-          </div>
-        </div>
-      </main>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
+      </div>
     );
   }
 
-  // Generate hearts based on level (max 3)
-  const hearts = Math.min(level, 3);
-
   return (
-    <div className="relative h-screen bg-[#f4f6ff] overflow-hidden">
-      {/* Fixed Header */}
-      <motion.div 
-        layout
-        className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-sm border-b border-gray-100"
-      >
-        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div className="flex gap-1">
-              <AnimatePresence>
-                {Array.from({ length: hearts }).map((_, i) => (
-                  <motion.div
-                    key={i}
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    exit={{ scale: 0 }}
-                    className="text-lg"
-                  >
-                    ❤️
-                  </motion.div>
-                ))}
-              </AnimatePresence>
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <div className="fixed top-0 left-0 right-0 bg-white shadow-sm z-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            <div className="flex items-center">
+              <h1 className="text-xl font-bold text-gray-900">Tradr</h1>
+              <div className="ml-4 flex items-center space-x-2">
+                <Button
+                  variant={timeFrame === '4H' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => handleTimeFrameChange('4H')}
+                >
+                  4H
+                </Button>
+                <Button
+                  variant={timeFrame === '1D' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => handleTimeFrameChange('1D')}
+                >
+                  1D
+                </Button>
+                <Button
+                  variant={timeFrame === '1W' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => handleTimeFrameChange('1W')}
+                >
+                  1W
+                </Button>
+              </div>
             </div>
-            <motion.div 
-              layout
-              className="text-sm font-medium"
-            >
-              🔥 
-              <motion.span
-                key={streak}
-                initial={{ scale: 0.5, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                className="text-orange-500"
-              >
-                {streak}
-              </motion.span>
-            </motion.div>
-          </div>
-          <div className="flex gap-2">
-            {(['4H', '1D', '1W'] as const).map((tf) => (
-              <motion.button
-                key={tf}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => handleTimeFrameChange(tf)}
-                className={`px-3 py-1 rounded text-xs font-medium transition-all
-                  ${timeFrame === tf 
-                    ? 'bg-black text-white' 
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                  }`}
-              >
-                {tf}
-              </motion.button>
-            ))}
+            <div className="flex items-center space-x-4">
+              <div className="text-sm font-medium text-gray-900">
+                Score: {score}
+              </div>
+            </div>
           </div>
         </div>
-      </motion.div>
-
-      {/* Chart Area (Full Screen) */}
-      <div className="absolute inset-0 pt-16">
-        <Chart
-          data={currentChart}
-          showResult={showResult}
-          isCorrect={isCorrect}
-          timeFrame={timeFrame}
-          onTimeFrameChange={handleTimeFrameChange}
-          decisionPrice={decisionPrice || undefined}
-          decisionIndex={decisionIndex || undefined}
-          isReplayComplete={isReplayComplete}
-        />
       </div>
 
-      {/* Fixed Controls at Bottom */}
-      <div className="fixed bottom-0 left-0 right-0 z-50 pointer-events-none">
-        <div className="container mx-auto px-4 pb-8">
-          <AnimatePresence mode="wait">
-            <div className="pointer-events-auto">
-              {showResult && isReplayComplete ? (
-                <ResultScreen
-                  key="result"
-                  isCorrect={isCorrect}
-                  onNext={handleNextRound}
-                  xpGained={10}
-                  streak={streak}
-                  highScore={score}
-                />
-              ) : !showResult ? (
+      {/* Main Content */}
+      <div className="pt-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          {/* Chart Placeholder */}
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 h-[600px] flex items-center justify-center">
+            <div className="text-gray-500 text-lg">Chart temporarily disabled</div>
+          </div>
+
+          {/* Decision Buttons */}
+          <div className="mt-8 flex justify-center space-x-4">
+            <Button
+              size="lg"
+              variant="outline"
+              className="bg-red-50 hover:bg-red-100 text-red-700 border-red-200"
+              onClick={() => handleDecision('sell')}
+              disabled={showResult}
+            >
+              SELL
+            </Button>
+            <Button
+              size="lg"
+              variant="outline"
+              className="bg-green-50 hover:bg-green-100 text-green-700 border-green-200"
+              onClick={() => handleDecision('buy')}
+              disabled={showResult}
+            >
+              BUY
+            </Button>
+          </div>
+
+          {/* Result Overlay */}
+          <AnimatePresence>
+            {showResult && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.8 }}
+                className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+              >
                 <motion.div
-                  key="controls"
-                  initial={{ y: 50, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  exit={{ y: 50, opacity: 0 }}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 20 }}
+                  className="bg-white rounded-lg p-8 max-w-md w-full mx-4 text-center"
                 >
-                  <GameControls onChoice={handleChoice} />
+                  <div className="text-6xl mb-4">
+                    {isCorrect ? '🎯' : '😢'}
+                  </div>
+                  <h2 className="text-2xl font-bold mb-4">
+                    {isCorrect ? 'Correct!' : 'Incorrect'}
+                  </h2>
+                  <p className="text-gray-600 mb-6">
+                    {isCorrect
+                      ? 'Great job! You made the right call.'
+                      : 'Better luck next time!'}
+                  </p>
+                  <Button onClick={handleNextRound}>
+                    Next Round
+                  </Button>
                 </motion.div>
-              ) : null}
-            </div>
+              </motion.div>
+            )}
           </AnimatePresence>
         </div>
       </div>
-
-      {/* Welcome Slides */}
-      <AnimatePresence>
-        {showWelcome && (
-          <WelcomeSlides 
-            isOpen={showWelcome} 
-            onComplete={() => setShowWelcome(false)} 
-          />
-        )}
-      </AnimatePresence>
     </div>
   );
 } 
