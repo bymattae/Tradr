@@ -1,13 +1,11 @@
-import React from 'react';
-import { Press_Start_2P } from 'next/font/google';
-import { AuthProvider } from '@/lib/contexts/AuthContext';
-import './globals.css';
+import './globals.css'
+import { Press_Start_2P } from 'next/font/google'
 
 const pressStart2P = Press_Start_2P({
   weight: '400',
   subsets: ['latin'],
-  display: 'swap',
-});
+  variable: '--font-heading',
+})
 
 export const metadata = {
   title: 'tradr',
@@ -17,17 +15,13 @@ export const metadata = {
 export default function RootLayout({
   children,
 }: {
-  children: React.ReactNode;
+  children: React.ReactNode
 }) {
   return (
     <html lang="en">
-      <body className="bg-[#FFFFFF]">
-        <div className={pressStart2P.className}>
-          <AuthProvider>
-            {children}
-          </AuthProvider>
-        </div>
+      <body className={`${pressStart2P.variable} font-sans antialiased`}>
+        {children}
       </body>
     </html>
-  );
+  )
 }

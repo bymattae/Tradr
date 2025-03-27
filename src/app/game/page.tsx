@@ -68,7 +68,7 @@ export default function GamePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
-              <h1 className="text-xl font-bold text-gray-900">Tradr</h1>
+              <h1 className="text-xl font-bold text-gray-900 font-heading">Tradr</h1>
               <div className="ml-4 flex items-center space-x-2">
                 <Button
                   variant={timeFrame === '4H' ? 'default' : 'outline'}
@@ -150,7 +150,7 @@ export default function GamePage() {
                   <div className="text-6xl mb-4">
                     {isCorrect ? '🎯' : '😢'}
                   </div>
-                  <h2 className="text-2xl font-bold mb-4">
+                  <h2 className="text-2xl font-bold mb-4 font-heading">
                     {isCorrect ? 'Correct!' : 'Incorrect'}
                   </h2>
                   <p className="text-gray-600 mb-6">
