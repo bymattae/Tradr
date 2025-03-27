@@ -26,8 +26,6 @@ export default function OnboardPage() {
     }
   };
 
-  const stepClass = (s: number) => s === step ? 'bg-blue-500' : 'bg-gray-200';
-
   return (
     <div className="min-h-screen bg-white flex flex-col">
       {/* Header */}
@@ -44,12 +42,12 @@ export default function OnboardPage() {
             ← BACK
           </button>
           <div className="flex items-center gap-2">
-            {[1, 2, 3].map((s) => {
-              const className = ["w-2", "h-2", "rounded-full", s === step ? "bg-blue-500" : "bg-gray-200"].join(" ");
-              return (
-                <div key={s} className={className} />
-              );
-            })}
+            {[1, 2, 3].map((s) => (
+              <div
+                key={s}
+                className={s === step ? "w-2 h-2 rounded-full bg-blue-500" : "w-2 h-2 rounded-full bg-gray-200"}
+              />
+            ))}
           </div>
         </div>
       </motion.div>
@@ -70,7 +68,7 @@ export default function OnboardPage() {
               {step === 3 && 'CHOOSE YOUR NAME'}
             </h1>
             <p className="text-gray-500 text-sm font-sans mb-8">
-              {step === 1 && 'We'll send you a verification code'}
+              {step === 1 && "We will send you a verification code"}
               {step === 2 && 'Check your phone for the code'}
               {step === 3 && 'This is how other players will see you'}
             </p>
