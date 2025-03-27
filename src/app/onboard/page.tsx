@@ -26,6 +26,8 @@ export default function OnboardPage() {
     }
   };
 
+  const stepClass = (s: number) => s === step ? 'bg-blue-500' : 'bg-gray-200';
+
   return (
     <div className="min-h-screen bg-white flex flex-col">
       {/* Header */}
@@ -42,15 +44,12 @@ export default function OnboardPage() {
             ← BACK
           </button>
           <div className="flex items-center gap-2">
-            {[1, 2, 3].map((s) => {
-              const stepClass = s === step ? 'bg-blue-500' : 'bg-gray-200';
-              return (
-                <div
-                  key={s}
-                  className={`w-2 h-2 rounded-full ${stepClass}`}
-                />
-              );
-            })}
+            {[1, 2, 3].map((s) => (
+              <div
+                key={s}
+                className={`w-2 h-2 rounded-full ${stepClass(s)}`}
+              />
+            ))}
           </div>
         </div>
       </motion.div>
