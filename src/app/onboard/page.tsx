@@ -44,12 +44,12 @@ export default function OnboardPage() {
             ← BACK
           </button>
           <div className="flex items-center gap-2">
-            {[1, 2, 3].map((s) => (
-              <div
-                key={s}
-                className={`w-2 h-2 rounded-full ${stepClass(s)}`}
-              />
-            ))}
+            {[1, 2, 3].map((s) => {
+              const className = ["w-2", "h-2", "rounded-full", s === step ? "bg-blue-500" : "bg-gray-200"].join(" ");
+              return (
+                <div key={s} className={className} />
+              );
+            })}
           </div>
         </div>
       </motion.div>
